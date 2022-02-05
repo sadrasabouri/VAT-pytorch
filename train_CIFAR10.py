@@ -129,6 +129,7 @@ def main():
     model = Net().to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
+    print(data_iterators['test'])
     train(args, model, device, data_iterators, optimizer)
     test(model, device, data_iterators)
 
