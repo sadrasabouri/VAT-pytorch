@@ -31,6 +31,10 @@ class Net(nn.Module):
 
 def train(args, model, device, data_iterators, optimizer):
     model.train()
+    iters = []
+    XEntropy = []
+    VATLosses = []
+    Precision = []
     for i in tqdm(range(args.iters)):
         
         # reset
@@ -67,12 +71,23 @@ def train(args, model, device, data_iterators, optimizer):
                   f'CrossEntropyLoss {ce_losses.val:.4f} ({ce_losses.avg:.4f})\t'
                   f'VATLoss {vat_losses.val:.4f} ({vat_losses.avg:.4f})\t'
                   f'Prec@1 {prec1.val:.3f} ({prec1.avg:.3f})')
+            iters.append(i)
+            XEntropy.append(ce_losses.avg)
+            VATLosses.append(vat_losses.avg)
+            Precision.append(prec1.avg)
+    print('ITERATIONS:')
+    print(iters)
+    print('CrossEntropyLosses:')
+    print(XEntropy)
+    print('VATLOSSES')
+    print(VATLosses)
+    print('PRECISION')
+    print(Precision)
 
 
 def test(model, device, data_iterators):
     model.eval()
     correct = 0
-    batch_size = len(list(tqdm(data_iterators['test']))[0][1])
     with torch.no_grad():
         for x, y in tqdm(data_iterators['test']):
             with torch.no_grad():
@@ -80,9 +95,7 @@ def test(model, device, data_iterators):
                 outputs = model(x)
             correct += torch.eq(outputs.max(dim=1)[1], y).detach().cpu().float().sum()
 
-        test_acc = correct / (len(tqdm(data_iterators['test'])) * batch_size) * 100.
-
-    print(f'\nTest Accuracy: {test_acc:.4f}%\n')
+    print(f'\nCorrects #: {correct}\n')
 
 
 def main():
