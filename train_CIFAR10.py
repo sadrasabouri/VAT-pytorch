@@ -75,11 +75,12 @@ def test(model, device, data_iterators):
     with torch.no_grad():
         for x, y in tqdm(data_iterators['test']):
             with torch.no_grad():
+                print(y.shape)
                 x, y = x.to(device), y.to(device)
                 outputs = model(x)
             correct += torch.eq(outputs.max(dim=1)[1], y).detach().cpu().float().sum()
 
-        test_acc = correct / len(data_iterators['test'].dataset) * 100.
+        test_acc = correct / len(tqdm(data_iterators['test'])) * 100.
 
     print(f'\nTest Accuracy: {test_acc:.4f}%\n')
 
@@ -129,7 +130,7 @@ def main():
     model = Net().to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
-    print(len(tqdm(data_iterators['test'])))
+
     train(args, model, device, data_iterators, optimizer)
     test(model, device, data_iterators)
 
