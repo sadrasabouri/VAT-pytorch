@@ -95,7 +95,7 @@ def test(model, device, data_iterators):
                 outputs = model(x)
             correct += torch.eq(outputs.max(dim=1)[1], y).detach().cpu().float().sum()
 
-    print(f'\nCorrects #: {correct:.4f}%\n')
+    print(f'\nCorrects #: {correct}\n')
 
 
 def main():
