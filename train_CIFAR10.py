@@ -72,15 +72,15 @@ def train(args, model, device, data_iterators, optimizer):
 def test(model, device, data_iterators):
     model.eval()
     correct = 0
+    batch_size = len(tqdm(data_iterators['test'])[0][1])
     with torch.no_grad():
         for x, y in tqdm(data_iterators['test']):
             with torch.no_grad():
-                print(y.shape)
                 x, y = x.to(device), y.to(device)
                 outputs = model(x)
             correct += torch.eq(outputs.max(dim=1)[1], y).detach().cpu().float().sum()
 
-        test_acc = correct / len(tqdm(data_iterators['test'])) * 100.
+        test_acc = correct / (len(tqdm(data_iterators['test'])) * batch_size) * 100.
 
     print(f'\nTest Accuracy: {test_acc:.4f}%\n')
 
