@@ -72,7 +72,7 @@ def train(args, model, device, data_iterators, optimizer):
 def test(model, device, data_iterators):
     model.eval()
     correct = 0
-    batch_size = len(tqdm(data_iterators['test'])[0][1])
+    batch_size = len(list(tqdm(data_iterators['test'])[0][1]))
     with torch.no_grad():
         for x, y in tqdm(data_iterators['test']):
             with torch.no_grad():
