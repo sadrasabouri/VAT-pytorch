@@ -38,6 +38,7 @@ class VATLoss(nn.Module):
     def forward(self, model, x):
         with torch.no_grad():
             pred = F.softmax(model(x), dim=1)
+            logp = F.log_softmax(pred, dim=1)
 
         # prepare random unit tensor
         d = torch.rand(x.shape).sub(0.5).to(x.device)
@@ -49,10 +50,10 @@ class VATLoss(nn.Module):
                 d.requires_grad_()
                 pred_hat = model(x + self.xi * d)
                 logp_hat = F.log_softmax(pred_hat, dim=1)
-                logp = F.log_softmax(pred, dim=1)
-                adv_distance = F.kl_div(logp_hat, (pred + pred_hat) / 2, reduction='batchmean') + \
-                               F.kl_div(logp, (pred + pred_hat) / 2, reduction='batchmean')
-                adv_distance = 0.5 * adv_distance        
+                logq = F.log_softmax((pred + pred_hat) / 2, dim=1)
+                adv_distance = F.kl_div(logp_hat, logq, log_target=True, reduction='batchmean') + \
+                               F.kl_div(logp, logq, log_target=True, reduction='batchmean')
+                adv_distance = 0.5 * adv_distance
                 adv_distance.backward()
                 d = _l2_normalize(d.grad)
                 model.zero_grad()
@@ -62,7 +63,9 @@ class VATLoss(nn.Module):
             pred_hat = model(x + r_adv)
             logp_hat = F.log_softmax(pred_hat, dim=1)
             logp = F.log_softmax(pred, dim=1)
-            lds = F.kl_div(logp_hat, (pred + pred_hat) / 2, reduction='batchmean') + \
-                  F.kl_div(logp, (pred + pred_hat) / 2, reduction='batchmean')
+            logq = F.log_softmax((pred + pred_hat) / 2, dim=1)
+            adv_distance = F.kl_div(logp_hat, logq, log_target=True, reduction='batchmean') + \
+                           F.kl_div(logp, logq, log_target=True, reduction='batchmean')
             lds = 0.5 * lds
+
         return lds
