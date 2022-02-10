@@ -64,8 +64,8 @@ class VATLoss(nn.Module):
             logp_hat = F.log_softmax(pred_hat, dim=1)
             logp = F.log_softmax(pred, dim=1)
             logq = F.log_softmax((pred + pred_hat) / 2, dim=1)
-            adv_distance = F.kl_div(logp_hat, logq, log_target=True, reduction='batchmean') + \
-                           F.kl_div(logp, logq, log_target=True, reduction='batchmean')
+            lds = F.kl_div(logp_hat, logq, log_target=True, reduction='batchmean') + \
+                  F.kl_div(logp, logq, log_target=True, reduction='batchmean')
             lds = 0.5 * lds
 
         return lds
